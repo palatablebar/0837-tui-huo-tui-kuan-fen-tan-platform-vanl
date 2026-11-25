@@ -102,6 +102,11 @@
 .p0837 .review { display: grid; gap: 8px; }
 .p0837 .review textarea { width: 100%; min-height: 62px; resize: vertical; }
 .p0837 .review-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.p0837 .receipts { display:grid; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); }
+.p0837 .receipt-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.p0837 .receipt-actions select { min-width:180px; padding:6px 8px; }
+.p0837 .receipts .hint { margin:0; }
+.p0837 .receipts a { color:var(--accent); text-decoration:underline; font-size:12px; }
 .p0837 .statusbar {
   display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
   padding: 9px calc(var(--pad) * 1.25); border-top: 1px solid var(--line); color: var(--muted); font-size: 12px;

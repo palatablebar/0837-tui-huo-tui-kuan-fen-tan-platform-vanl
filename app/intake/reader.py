@@ -1,7 +1,7 @@
 import csv
 import io
 
-from app.errors import DomainIssue
+from app.domain_errors import DomainIssue
 from app.intake.normalize import canonical
 from app.intake.schema import validate_header
 

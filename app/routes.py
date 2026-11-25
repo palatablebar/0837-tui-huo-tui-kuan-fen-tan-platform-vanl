@@ -4,7 +4,9 @@ from app.catalog import SPEC
 from app.config import SAMPLES
 from app.errors import DomainIssue
 from app.evidence.render import render
+from app.receipts.service import issue_order_receipt, list_order_ids
 from app.review.service import approve, create_run, serialize
+from app.security.keys import load_signing_key
 from app.service import pipeline
 
 
@@ -66,6 +68,31 @@ def review(run_id):
 def evidence(run_id):
     run = serialize(store().get(run_id))
     return jsonify(render(run))
+
+
+@api.get("/api/verify-key")
+def verify_key():
+    # 信任锚分发：复核方在可信通道保存一次公钥，之后离线核验无需再访问工作台
+    key = load_signing_key()
+    return jsonify(schema="workbench-verify-key/v1", key_id=key.key_id,
+                   alg="Ed25519", public_key=key.public.hex())
+
+
+@api.get("/api/runs/<run_id>/orders")
+def run_orders(run_id):
+    run = serialize(store().get(run_id))
+    return jsonify(run_id=run_id, order_ids=list_order_ids(run))
+
+
+@api.get("/api/runs/<run_id>/receipts/<order_id>")
+def order_receipt(run_id, order_id):
+    run = serialize(store().get(run_id))
+    receipt = issue_order_receipt(run, order_id)
+    response = jsonify(receipt)
+    # 触发浏览器下载，文件名只含批次与订单，不含其他订单信息
+    response.headers["Content-Disposition"] = (
+        f'attachment; filename="receipt-{run_id}-{order_id}.json"')
+    return response
 
 
 @api.get("/api/examples/<profile>")

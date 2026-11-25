@@ -38,6 +38,16 @@
           <a id="download" href="#" download hidden>下载复核证据</a>
         </div>
       </div>
+      <div class="receipts" id="receipt-panel" hidden>
+        <div class="panel-head"><h2>单订单凭证</h2><span class="hint">离线可验 · 不含其他订单</span></div>
+        <label for="receipt-order">选择订单</label>
+        <div class="receipt-actions">
+          <select id="receipt-order" disabled></select>
+          <a id="receipt-download" href="#" download hidden>下载该订单凭证</a>
+        </div>
+        <p class="hint" id="receipt-note">凭证只含所选订单的金额与 Merkle 证明；外部复核方用工作台核验公钥离线验真。</p>
+        <a id="verify-key-download" href="/api/verify-key" download="verify-key.json">下载核验公钥（信任锚）</a>
+      </div>
     </article>
   </section>
 </main>

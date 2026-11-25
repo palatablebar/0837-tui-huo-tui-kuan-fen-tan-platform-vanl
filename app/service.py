@@ -39,6 +39,21 @@ def pipeline(profile="dirty", path=None, upto="证据交付"):
         results = decide_rows(results)
     if _stage(upto) >= 5:
         ledger = build_ledger(intake, prepared, prepare_issues, results)
+        # 订单级签发记录：完整、不截断，作为单订单凭证批根的承诺内容
+        orders = [
+            {
+                "order_id": item["order_id"],
+                "refund_cents": int(item["refund"]),
+                "payment_cents": int(item["payment"]),
+                "freight_refund_cents": int(item["freight_refund"]),
+                "verdict": item["verdict"],
+                "reason": item["reason"],
+                "lines": item["line_details"],
+            }
+            for item in results
+        ]
+    else:
+        orders = []
     intake["counts"]["prepared"] = len(prepared)
     intake["counts"]["computed"] = len(results)
     issues = intake["issues"] + prepare_issues
@@ -72,6 +87,7 @@ def pipeline(profile="dirty", path=None, upto="证据交付"):
         "row_kind": "source" if raw_stage else "result",
         "chart": chart,
         "summary": summary,
+        "orders": orders,
         "ledger": ledger,
         "stages": [{"id": "intake", "name": SPEC["stages"][0]},
                    {"id": "prepare", "name": SPEC["stages"][1]},

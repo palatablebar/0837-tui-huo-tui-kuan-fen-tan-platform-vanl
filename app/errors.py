@@ -1,5 +1,6 @@
 from flask import jsonify
 
+from app.domain_errors import DomainIssue
 
 MESSAGES = {
     "EMPTY_FILE": "文件为空",
@@ -17,16 +18,10 @@ MESSAGES = {
     "STALE_REVIEW": "批次已被更新，请刷新后复核",
     "GATE_BLOCKED": "存在阻断项，不能签发",
     "NOT_APPROVED": "批次尚未签发",
+    "ORDER_NOT_IN_BATCH": "该订单不在此批次中",
+    "BATCH_RECORDS_MISSING": "旧批次缺少订单级签发记录，无法核实签发金额，不出具可验凭证",
     "BAD_REQUEST": "请求内容不完整",
 }
-
-
-class DomainIssue(Exception):
-    def __init__(self, code: str, status: int = 400, detail: str | None = None):
-        self.code = code
-        self.status = status
-        self.detail = detail
-        super().__init__(code)
 
 
 def error_response(exc: DomainIssue):

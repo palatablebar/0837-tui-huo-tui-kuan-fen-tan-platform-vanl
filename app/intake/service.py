@@ -3,7 +3,7 @@ from pathlib import Path
 
 from app.catalog import SPEC
 from app.config import SAMPLES
-from app.errors import DomainIssue
+from app.domain_errors import DomainIssue
 from app.intake.limits import MAX_FILE, MAX_ROWS
 from app.intake.reader import read_records
 

@@ -29,6 +29,12 @@ def calculate_rows(items):
         out.append({"label": order_id, "refund": refund, "discount": discount,
                     "gross": gross, "payment": lines[0]["payment"], "problem": problem,
                     "freight_refund": freight_refund,
+                    "order_id": order_id,
+                    "line_details": [
+                        {"line_id": line["line_id"], "refund_cents": int(line["refund"]),
+                         "alloc_discount_cents": int(line["alloc_discount"])}
+                        for line in lines
+                    ],
                     "breakdown": [f'{line["line_id"]} · 分摊 {line["alloc_discount"]} 分 · 应退 {line["refund"]} 分'
                                   for line in lines],
                     "metric": refund, "limit": lines[0]["payment"]})

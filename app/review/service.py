@@ -1,6 +1,6 @@
 import json
 
-from app.errors import DomainIssue
+from app.domain_errors import DomainIssue
 from app.review.policy import approval_allowed
 
 

@@ -23,5 +23,8 @@ docker compose config --quiet
 2. 选择 `dirty` 样例观察坏行和隔离原因。
 3. 换 `clean` 样例执行批次，填写复核意见后签发。
 4. 下载证据 JSON，核对来源摘要、指标和签发版本。
+5. 在「单订单凭证」区选择订单下载离线可验凭证；外部复核方用核验公钥通过
+   `python tools/verify_receipt.py 凭证.json --key verify-key.json` 离线验真。
 
-业务规则见 `docs/BUSINESS-RULES.md`，字段定义见 `docs/DATA-DICTIONARY.md`。
+业务规则见 `docs/BUSINESS-RULES.md`，字段定义见 `docs/DATA-DICTIONARY.md`，
+单订单凭证的结构、威胁模型与离线核验见 `docs/RECEIPTS.md`。

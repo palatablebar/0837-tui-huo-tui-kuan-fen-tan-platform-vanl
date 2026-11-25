@@ -1,5 +1,5 @@
 (function () {
-  var state = { payload: null, kind: 'bars', run: null, approved: false };
+  var state = { payload: null, kind: 'bars', run: null, approved: false, orderIds: [] };
   var $ = function (id) { return document.getElementById(id); };
   function esc(value) {
     return String(value === null || value === undefined ? '' : value).replace(/[&<>"']/g, function (ch) {
@@ -85,10 +85,51 @@
     } catch (error) { setNotice(error.message); }
     finally { document.body.removeAttribute('aria-busy'); }
   }
+  function resetReceiptPanel() {
+    state.orderIds = [];
+    $('receipt-panel').hidden = true;
+    $('receipt-order').innerHTML = '';
+    $('receipt-order').disabled = true;
+    $('receipt-download').hidden = true;
+  }
+  async function loadReceiptOrders(run) {
+    var data = await request('/api/runs/' + run.run_id + '/orders');
+    state.orderIds = data.order_ids || [];
+    var select = $('receipt-order');
+    select.innerHTML = state.orderIds.map(function (orderId) {
+      return '<option value="' + esc(orderId) + '">' + esc(orderId) + '</option>';
+    }).join('');
+    select.disabled = state.orderIds.length === 0;
+    $('receipt-panel').hidden = false;
+    updateReceiptLink();
+  }
+  function updateReceiptLink() {
+    var select = $('receipt-order');
+    var link = $('receipt-download');
+    if (!state.run || !state.approved || !select.value) { link.hidden = true; return; }
+    link.href = '/api/runs/' + state.run.run_id + '/receipts/' + encodeURIComponent(select.value);
+    link.hidden = false;
+  }
+  function reflectApproval(run) {
+    state.run = run;
+    state.approved = run.status === 'APPROVED';
+    $('run-status').textContent = run.status + ' · rev ' + run.revision;
+    $('revision').textContent = 'rev ' + run.revision;
+    $('sign').disabled = true;
+    $('hold').disabled = true;
+    $('download').hidden = !state.approved;
+    if (state.approved) {
+      $('download').href = '/api/runs/' + run.run_id + '/evidence';
+      loadReceiptOrders(run).catch(function (error) { setNotice(error.message); });
+    } else {
+      resetReceiptPanel();
+    }
+  }
   async function runBatch() {
     try {
       setNotice('');
       $('run').disabled = true;
+      resetReceiptPanel();
       var run = await request('/api/runs', {method: 'POST', body: JSON.stringify({profile: $('profile').value})});
       state.run = run;
       state.approved = run.status === 'APPROVED';
@@ -98,7 +139,7 @@
       $('sign').disabled = run.summary.REJECT > 0 || state.approved;
       $('hold').disabled = state.approved;
       $('download').hidden = !state.approved;
-      if (state.approved) $('download').href = '/api/runs/' + run.run_id + '/evidence';
+      if (state.approved) reflectApproval(run);
     } catch (error) { setNotice(error.message); }
     finally { $('run').disabled = false; }
   }
@@ -109,14 +150,7 @@
         method: 'POST',
         body: JSON.stringify({decision: decision, comment: $('comment').value, expected_revision: state.run.revision})
       });
-      state.run = run;
-      state.approved = run.status === 'APPROVED';
-      $('run-status').textContent = run.status + ' · rev ' + run.revision;
-      $('revision').textContent = 'rev ' + run.revision;
-      $('sign').disabled = true;
-      $('hold').disabled = true;
-      $('download').hidden = !state.approved;
-      if (state.approved) $('download').href = '/api/runs/' + run.run_id + '/evidence';
+      reflectApproval(run);
     } catch (error) { setNotice(error.message); }
   }
   async function boot() {
@@ -135,9 +169,11 @@
     $('profile').addEventListener('change', function () {
       state.run = null; state.approved = false;
       $('sign').disabled = true; $('hold').disabled = true; $('download').hidden = true;
+      resetReceiptPanel();
       $('run-status').textContent = '未执行批次'; $('revision').textContent = 'rev 0';
       loadStage('intake');
     });
+    $('receipt-order').addEventListener('change', updateReceiptLink);
   }
   document.addEventListener('DOMContentLoaded', boot);
 })();

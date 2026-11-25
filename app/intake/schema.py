@@ -1,4 +1,4 @@
-from app.errors import DomainIssue
+from app.domain_errors import DomainIssue
 from app.intake.normalize import canonical
 
 
